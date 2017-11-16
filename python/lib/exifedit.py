@@ -65,7 +65,7 @@ def create_mapillary_description(filename, username, email, userkey,
     assert(email is not None or userkey is not None)
     if email is not None:
         mapillary_description["MAPSettingsEmail"] = email
-    if username is not None:
+    if email is not None and userkey is None:
         mapillary_description["MAPSettingsUsername"] = username
 
     # use this if available, and omit MAPSettingsUsername and MAPSettingsEmail for privacy reasons
