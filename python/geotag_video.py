@@ -79,6 +79,7 @@ def get_args():
     p.add_argument('--offset_angle', default=0., type=float, help='offset camera angle (90 for right facing, 180 for rear facing, -90 for left facing)')
     p.add_argument("--skip_sampling", help="Skip video sampling step", action="store_true")
     p.add_argument("--use_gps_start_time", help="Use GPS trace starting time as reference", action="store_true")
+    p.add_argument("--video_start_time", help="Specify video start time", default="none")
     p.add_argument("--make", help="Specify device manufacturer", default="none")
     p.add_argument("--model", help="Specify device model", default="none")
     return p.parse_args()
@@ -103,9 +104,9 @@ if __name__ == "__main__":
     if args.use_gps_start_time:
         start_time = points[0][0]
     else:
-        start_time = get_video_start_time(video_file) or points[0][0]
+        start_time = get_video_start_time(video_file) or datetime.datetime.utcfromtimestamp(int(args.video_start_time)/1000) or points[0][0]
     start_time += datetime.timedelta(seconds=time_offset)
-
+        
     print("Video starts at: {}".format(start_time))
     print("GPS trace starts at: {}".format(points[0][0]))
 
