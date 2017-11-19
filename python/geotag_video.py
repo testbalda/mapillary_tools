@@ -11,6 +11,7 @@ import lib.exifedit as exifedit
 import lib.geo as geo
 from lib.gps_parser import get_lat_lon_time_from_gpx, get_lat_lon_time_from_nmea
 from lib.ffprobe import FFProbe
+import random
 
 ZERO_PADDING = 6
 TIME_FORMAT = "%Y-%m-%d %H:%M:%S"
@@ -82,6 +83,8 @@ def get_args():
     p.add_argument("--video_start_time", help="Specify video start time", default="none")
     p.add_argument("--make", help="Specify device manufacturer", default="none")
     p.add_argument("--model", help="Specify device model", default="none")
+    p.add_argument("--image_prefix", help="Specify the prefix for the images, to avoid same names", default=str(int(random.random()*1000000)))
+    
     return p.parse_args()
 
 
@@ -117,7 +120,7 @@ if __name__ == "__main__":
     # Sample video
     if not args.skip_sampling:
         sample_video(video_file, image_path, sample_interval)
-
+    
     # Add EXIF data to sample images
     image_list = list_images(image_path)
     print "Adding EXIF to {} images".format(len(image_list))
@@ -142,7 +145,8 @@ if __name__ == "__main__":
                 "make": make,
                 "model": model
             }
-            exifedit.add_exif_data(os.path.join(image_path, im), data)
+            os.rename(os.path.join(image_path,im), os.path.join(image_path,args.image_prefix + '_' +im))
+            exifedit.add_exif_data(os.path.join(image_path, args.image_prefix + '_' + im), data)
         except Exception as e:
             print e
             print "Image {} timestamp out of range. Skipping".format(im)
