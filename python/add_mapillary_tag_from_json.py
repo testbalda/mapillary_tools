@@ -70,15 +70,18 @@ if __name__ == '__main__':
         if f.lower().endswith(('jpg', 'jpeg', 'png', 'tif', 'tiff', 'pgm', 'pnm', 'gif')):
             output_file = os.path.join(output_path, os.path.basename(f))
             if f in metadata:
-                add_mapillary_description(
-                    os.path.join(image_path, f),
-                    MAPILLARY_USERNAME,
-                    MAPILLARY_EMAIL,
-                    project_key,
-                    upload_token,
-                    metadata[f],
-                    output_file)
-                num_added += 1
+                try:
+                    add_mapillary_description(
+                        os.path.join(image_path, f),
+                        MAPILLARY_USERNAME,
+                        MAPILLARY_EMAIL,
+                        project_key,
+                        upload_token,
+                        metadata[f],
+                        output_file)
+                    num_added += 1
+                except:
+                    pass
             else:
                 print "Missing metadata for {}, skipping...".format(f)
             progress(i, len(images))
