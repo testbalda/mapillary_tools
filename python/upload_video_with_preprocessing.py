@@ -42,31 +42,34 @@ if __name__ == "__main__":
         if args.offset_angle:
             cmd.extend(["--offset_angle", str(args.offset_angle)])
         if args.image_prefix:
-            cmd.extend(["--image_prefix", args.image_prefix])
+            cmd.extend(["--image_prefix", str(args.image_prefix)])
 
         run(cmd)
 
     assert(args.user is not None and (args.email is not None or args.userkey is not None))
 
-    if not args.skip_upload:
-        upload_cmd = [
-            "python", "upload_with_preprocessing.py",
-            args.image_path,
-            "--remove_duplicates",
-            "--interpolate_directions",
-            "--duplicate_distance", "0.5",
-            "--duplicate_angle", "360",
-            "--user", args.user,
-        ]
-        if args.email:
-            upload_cmd.extend(["--email", args.email])
-        if args.project:
-            upload_cmd.extend(["--project", repr(args.project)])        
-        if args.project_key:
-            upload_cmd.extend(["--project_key", args.project_key])      
-        if args.offset_angle:
-            upload_cmd.extend(["--offset_angle", args.offset_angle])
-        if args.userkey:
-            upload_cmd.extend(["--userkey", args.userkey])      
     
-        run(upload_cmd)
+    upload_cmd = [
+        "python", "upload_with_preprocessing.py",
+        args.image_path,
+        "--remove_duplicates",
+        "--interpolate_directions",
+        "--duplicate_distance", "0.5",
+        "--duplicate_angle", "360",
+        "--user", args.user,
+    ]
+    if args.email:
+        upload_cmd.extend(["--email", args.email])
+    if args.project:
+        upload_cmd.extend(["--project", repr(args.project)])        
+    if args.project_key:
+        upload_cmd.extend(["--project_key", args.project_key])      
+    if args.offset_angle:
+        upload_cmd.extend(["--offset_angle", str(args.offset_angle)])
+    if args.userkey:
+        upload_cmd.extend(["--userkey", args.userkey])  
+    if args.skip_upload:
+        upload_cmd.append("--skip_upload")
+    
+
+    run(upload_cmd)
