@@ -83,7 +83,6 @@ def get_args():
     p.add_argument("--video_start_time", help="Specify video start time", default="none")
     p.add_argument("--make", help="Specify device manufacturer", default="none")
     p.add_argument("--model", help="Specify device model", default="none")
-    p.add_argument("--image_prefix", help="Specify the prefix for the images, to avoid same names", default=str(int(random.random()*1000000)))
     
     return p.parse_args()
 
@@ -145,8 +144,7 @@ if __name__ == "__main__":
                 "make": make,
                 "model": model
             }
-            os.rename(os.path.join(image_path,im), os.path.join(image_path,args.image_prefix + '_' +im))
-            exifedit.add_exif_data(os.path.join(image_path, args.image_prefix + '_' + im), data)
+            exifedit.add_exif_data(os.path.join(image_path, im), data)
         except Exception as e:
             print e
             print "Image {} timestamp out of range. Skipping".format(im)
