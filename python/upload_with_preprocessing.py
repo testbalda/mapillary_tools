@@ -83,12 +83,14 @@ def get_args():
     parser.add_argument('--project_key', help="add project to EXIF (project key)", default=None)
     parser.add_argument('--skip_validate_project', help="do not validate project key or projectd name", action='store_true')
     parser.add_argument('--add_file_name', help="add original file name to EXIF", action='store_true')
+    parser.add_argument('--absolute_path_to_add', help="add a string representing the absolute path to file, to be inserted to EXIF", default='')
     parser.add_argument('--verbose', help='print debug info', action='store_true')
     parser.add_argument("--user", help="user name")
     parser.add_argument("--email", help="user email")
     parser.add_argument("--userkey", help="user key")
     parser.add_argument("--make", help="Specify device manufacturer", default="")
     parser.add_argument("--model", help="Specify device model", default="")
+    parser.add_argument("--extra_MAPdata", help = 'pass extra MAPdata in form of "key1":"value1","key2":"value2"')
     return parser.parse_args()
 
 if __name__ == '__main__':
@@ -122,8 +124,9 @@ if __name__ == '__main__':
     add_file_name = args.add_file_name
     make = args.make
     model = args.model
-
-
+    abs_file_path = args.absolute_path_to_add
+    extraMAPdata = args.extra_MAPdata
+    
     # Retrieve/validate project key
     if not args.skip_validate_project:
         project_key = get_project_key(args.project, args.project_key)
@@ -257,8 +260,8 @@ if __name__ == '__main__':
 
                         # Add original file name to EXIF
                         if add_file_name:
-                            external_properties = {"file_name": os.path.abspath(filename)}
-
+                            external_properties = {"file_name": abs_file_path + os.path.basename(filename)}
+                            
                         if verify_exif(filepath):
                             if not retry_upload:
                                 # skip creating new sequence id for failed images
@@ -276,7 +279,8 @@ if __name__ == '__main__':
                                                              secret_hash,
                                                              external_properties,
                                                              make = make,
-                                                             model = model)
+                                                             model = model,
+                                                             extraMAPdata=extraMAPdata)
                             file_list.append(filepath)
                         else:
                             missing_groups.append(filepath)
