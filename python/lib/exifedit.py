@@ -7,7 +7,6 @@ import base64
 import uuid
 import os
 import shutil
-
 import piexif
 from PIL import Image
 
@@ -26,7 +25,8 @@ def create_mapillary_description(filename, username, email, userkey,
                                  external_properties=None,
                                  verbose=False,
                                  make="",
-                                 model=""):
+                                 model="",
+                                 extraMAPdata=None):
     '''
     Check that image file has the required EXIF fields.
 
@@ -119,7 +119,6 @@ def create_mapillary_description(filename, username, email, userkey,
     if external_properties is not None:
         # externl proerties can be saved and searched in Mapillary later on
         mapillary_description['MAPExternalProperties'] = external_properties
-
     if make:
         mapillary_description['MAPDeviceMake'] = make
 
@@ -128,6 +127,13 @@ def create_mapillary_description(filename, username, email, userkey,
     # write to file
     if verbose:
         print("tag: {0}".format(mapillary_description))
+
+    if extraMAPdata:
+        for pair in extraMAPdata.split(","):
+            MAP_key = pair.split(":")[0]
+            MAP_value = pair.split(":")[1]
+            mapillary_description[MAP_key] = MAP_value
+
     metadata = ExifEdit(filename)
     metadata.add_image_description(mapillary_description)
     metadata.add_orientation(orientation)
