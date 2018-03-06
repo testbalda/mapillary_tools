@@ -130,7 +130,7 @@ def create_mapillary_description(filename, username, email, userkey,
         print("tag: {0}".format(mapillary_description))
 
     if extraMAPdata:
-        for pair in extraMAPdata.split(","):
+        for pair in extraMAPdata.split(";"):
             MAP_key = pair.split(":")[0]
             MAP_value = pair[(pair.index(":") + 1):]
             mapillary_description[MAP_key] = MAP_value
