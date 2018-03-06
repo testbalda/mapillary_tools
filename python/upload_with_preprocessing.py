@@ -90,7 +90,7 @@ def get_args():
     parser.add_argument("--userkey", help="user key")
     parser.add_argument("--make", help="Specify device manufacturer", default="")
     parser.add_argument("--model", help="Specify device model", default="")
-    parser.add_argument("--extra_MAPdata", help = 'pass extra MAPdata in form of "key1":"value1","key2":"value2"')
+    parser.add_argument("--extra_MAPdata", help = 'pass extra MAPdata in form of "key1":"value1";"key2":"value2"')
     return parser.parse_args()
 
 if __name__ == '__main__':
