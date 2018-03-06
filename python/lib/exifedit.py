@@ -132,6 +132,10 @@ def create_mapillary_description(filename, username, email, userkey,
         for pair in extraMAPdata.split(";"):
             MAP_key = pair.split(":")[0]
             MAP_value = pair[(pair.index(":") + 1):]
+            try:
+                MAP_value = eval(MAP_value)
+            except:
+                pass
             mapillary_description[MAP_key] = MAP_value
 
     metadata = ExifEdit(filename)
