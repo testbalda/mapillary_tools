@@ -26,7 +26,8 @@ def create_mapillary_description(filename, username, email, userkey,
                                  verbose=False,
                                  make="",
                                  model="",
-                                 extraMAPdata=None):
+                                 extraMAPdata=None,
+                                 GPS_accuracy=""):
     '''
     Check that image file has the required EXIF fields.
 
@@ -125,6 +126,10 @@ def create_mapillary_description(filename, username, email, userkey,
 
     if model:
         mapillary_description['MAPDeviceModel'] = model
+
+    if GPS_accuracy:
+        mapillary_description['MAPGPSAccuracyMeters'] = float(GPS_accuracy)
+
     # write to file
     if verbose:
         print("tag: {0}".format(mapillary_description))

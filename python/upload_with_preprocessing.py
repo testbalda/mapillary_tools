@@ -91,6 +91,7 @@ def get_args():
     parser.add_argument("--make", help="Specify device manufacturer", default="")
     parser.add_argument("--model", help="Specify device model", default="")
     parser.add_argument("--extra_MAPdata", help = 'pass extra MAPdata in form of "key1":"value1";"key2":"value2"')
+    parser.add_argument("--GPS_accuracy", help="GPS accuracy in meters",default="")
     return parser.parse_args()
 
 if __name__ == '__main__':
@@ -126,6 +127,7 @@ if __name__ == '__main__':
     model = args.model
     abs_file_path = args.absolute_path_to_add
     extraMAPdata = args.extra_MAPdata
+    GPS_accuracy=args.GPS_accuracy
     
     # Retrieve/validate project key
     if not args.skip_validate_project:
@@ -280,7 +282,8 @@ if __name__ == '__main__':
                                                              external_properties,
                                                              make = make,
                                                              model = model,
-                                                             extraMAPdata=extraMAPdata)
+                                                             extraMAPdata=extraMAPdata,
+                                                             GPS_accuracy=GPS_accuracy)
                             file_list.append(filepath)
                         else:
                             missing_groups.append(filepath)
