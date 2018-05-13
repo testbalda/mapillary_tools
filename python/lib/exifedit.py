@@ -20,7 +20,8 @@ def create_mapillary_description(filename, username, email, userkey,
                                  offset_angle=0.0,
                                  timestamp=None,
                                  orientation=None,
-                                 project="",
+                                 organization_key=None,
+                                 private=False,
                                  secret_hash=None,
                                  external_properties=None,
                                  verbose=False,
@@ -99,6 +100,8 @@ def create_mapillary_description(filename, username, email, userkey,
     # a sequene ID to make the images go together (order by MAPCaptureTime)
     mapillary_description['MAPSequenceUUID'] = str(sequence_uuid)
 
+    mapillary_description['MAPPrivate'] = private
+
     # The device manufacturer
     if make:
         mapillary_description['MAPDeviceMake'] = make
@@ -114,8 +117,8 @@ def create_mapillary_description(filename, username, email, userkey,
     if upload_hash is None and secret_hash is not None:
         mapillary_description['MAPVideoSecure'] = secret_hash
 
-    if project:
-        mapillary_description["MAPSettingsProject"] = project
+    if organization_key:
+        mapillary_description["MAPOrganizationKey"] = organization_key
 
     # external properties (optional)
     if external_properties is not None:
@@ -152,8 +155,8 @@ def create_mapillary_description(filename, username, email, userkey,
 
 
 def add_mapillary_description(filename, username, email,
-                              project, upload_hash, image_description,
-                              output_file=None):
+                              organization_key, upload_hash, image_description,
+                              output_file=None, private=False):
     """Add Mapillary description tags directly with user info."""
 
     if username is not None:
@@ -166,9 +169,9 @@ def add_mapillary_description(filename, username, email,
 
         image_description['MAPSettingsUploadHash'] = settings_upload_hash
 
-        # if this image is part of a projet, the project UUID
-        if project:
-            image_description["MAPSettingsProject"] = project
+    # if this image is part of an organization, the organization UUID
+    if organization_key:
+        image_description["MAPOrganizationKey"] = organization_key
 
     assert("MAPSequenceUUID" in image_description)
 
@@ -190,6 +193,8 @@ def add_mapillary_description(filename, username, email,
         width, height = Image.open(filename).size
         image_description["MAPImageWidth"] = width
         image_description["MAPImageHeight"] = height
+
+    image_description['MAPPrivate'] = private
 
     # write to file
     metadata = ExifEdit(filename)

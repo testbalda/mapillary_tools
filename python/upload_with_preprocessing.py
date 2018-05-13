@@ -6,7 +6,7 @@ import uuid
 import argparse
 import json
 
-from lib.uploader import get_upload_token, upload_file_list, upload_done_file, upload_summary, get_project_key
+from lib.uploader import get_upload_token, upload_file_list, upload_done_file, upload_summary, validate_organization, get_user_key
 import lib.uploader as uploader
 from lib.sequence import Sequence
 from lib.exif import is_image, verify_exif, format_orientation
@@ -79,9 +79,10 @@ def get_args():
     parser.add_argument('--duplicate_distance', help='max distance for two images to be considered duplicates in meters', default=0.1)
     parser.add_argument('--duplicate_angle', help='max angle for two images to be considered duplicates in degrees', default=5)
     parser.add_argument('--auto_done', help='do not ask for confirmation after every sequence but submit all', action='store_true')
-    parser.add_argument('--project', help="add project name in case validation is required", default=None)
-    parser.add_argument('--project_key', help="add project to EXIF (project key)", default=None)
-    parser.add_argument('--skip_validate_project', help="do not validate project key or projectd name", action='store_true')
+    parser.add_argument('--organization_name', help="add organization name in case validation is required", default=None)
+    parser.add_argument('--organization_key', help="add organization key to EXIF", default=None)
+    parser.add_argument('--skip_validate_organization', help="do not validate organization key or organization name", action='store_true')
+    parser.add_argument('--private', help="Import to private organization", action='store_true', default = False)
     parser.add_argument('--add_file_name', help="add original file name to EXIF", action='store_true')
     parser.add_argument('--absolute_path_to_add', help="add a string representing the absolute path to file, to be inserted to EXIF", default='')
     parser.add_argument('--verbose', help='print debug info', action='store_true')
@@ -128,12 +129,18 @@ if __name__ == '__main__':
     abs_file_path = args.absolute_path_to_add
     extraMAPdata = args.extra_MAPdata
     GPS_accuracy=args.GPS_accuracy
+    private = args.private
     
-    # Retrieve/validate project key
-    if (args.project or args.project_key) and not args.skip_validate_project:
-        project_key = get_project_key(args.project, args.project_key)
-    else:
-        project_key = args.project_key
+    user_name = args.user if args.user else os.environ['MAPILLARY_USERNAME'] if 'MAPILLARY_USERNAME' in os.environ else None
+    if not user_name:
+        print("Error, must provide user name, exiting...")
+        sys.exit()
+        
+    user_key = args.userkey if args.userkey else get_user_key(user_name)
+    if not user_key:
+        print("Error, user name {} does not exist, exiting...".format(user_name))
+        sys.exit()
+        
 
     # Map orientation from degress to tags
     if orientation is not None:
@@ -146,13 +153,13 @@ if __name__ == '__main__':
 
     # Fetch authentication info
     try:
-        MAPILLARY_USERNAME = args.user if args.user is not None else os.environ['MAPILLARY_USERNAME']
+        MAPILLARY_USERNAME = user_name
         MAPILLARY_EMAIL=None
         if args.email:
             MAPILLARY_EMAIL = args.email
         elif 'MAPILLARY_EMAIL' in os.environ:
             MAPILLARY_EMAIL=os.environ['MAPILLARY_EMAIL']
-        MAPILLARY_USERKEY = args.userkey
+        MAPILLARY_USERKEY = user_key
         MAPILLARY_SECRET_HASH = os.environ.get('MAPILLARY_SECRET_HASH', None)
         secret_hash = None
         upload_token = None
@@ -171,6 +178,15 @@ if __name__ == '__main__':
         print("You are missing one of the environment variables MAPILLARY_USERNAME, MAPILLARY_EMAIL, MAPILLARY_PASSWORD, MAPILLARY_PERMISSION_HASH or MAPILLARY_SIGNATURE_HASH. These are required.")
         sys.exit()
 
+    # Retrieve/validate organization key
+    if (args.organization_name or args.organization_key) and not args.skip_validate_organization and not MAPILLARY_SECRET_HASH:
+        organization_key = validate_organization(args.organization_name, args.organization_key, private, user_name, user_key, upload_token)
+    else:
+        organization_key = args.organization_key
+        
+    if not organization_key and private==True:
+        print("Error, organization key not valid, while organization privacy set, please provide valid organization name or organization key, exiting...")
+        sys.exit()
     # Check whether the directory has been processed before
     logs = read_log(path)
     retry_upload = False
@@ -277,7 +293,8 @@ if __name__ == '__main__':
                                                              offset_angle,
                                                              timestamp,
                                                              orientation,
-                                                             project_key,
+                                                             organization_key,
+                                                             private,
                                                              secret_hash,
                                                              external_properties,
                                                              make = make,

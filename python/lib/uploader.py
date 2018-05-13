@@ -28,6 +28,8 @@ CLIENT_ID = "MkJKbDA0bnZuZlcxeTJHTmFqN3g1dzo1YTM0NjRkM2EyZGU5MzBh"
 LOGIN_URL = "https://a.mapillary.com/v2/ua/login?client_id={}".format(CLIENT_ID)
 PROJECTS_URL = "https://a.mapillary.com/v3/users/{}/projects?client_id={}"
 ME_URL = "https://a.mapillary.com/v3/me?client_id={}".format(CLIENT_ID)
+ORGANIZATIONS_URL = "https://a.mapillary.com/v3/users/{}/organizations?client_id={}"
+USER_URL = "https://a.mapillary.com/v3/users?usernames={}&client_id={}"
 
 class UploadThread(threading.Thread):
     def __init__(self, queue, params=UPLOAD_PARAMS):
@@ -188,6 +190,39 @@ def get_full_authentication_info(user=None, email=None):
         print("You are missing one of the environment variables MAPILLARY_USERNAME, MAPILLARY_EMAIL, MAPILLARY_PASSWORD, MAPILLARY_PERMISSION_HASH or MAPILLARY_SIGNATURE_HASH. These are required.")
         sys.exit()
 
+
+def get_user_key(user_name):
+    user_key = ""
+    req = urllib2.Request(USER_URL.format(user_name, CLIENT_ID))
+    resp = json.loads(urllib2.urlopen(req).read())
+    if 'key' in resp[0]:
+        user_key = resp[0]['key']
+
+    return user_key
+
+def validate_organization(organization_name, organization_key, private, user_name, user_key, upload_token):
+    
+    call = ORGANIZATIONS_URL.format(user_key, CLIENT_ID)
+    req = urllib2.Request(call)
+    req.add_header('Authorization', 'Bearer {}'.format(upload_token))
+    resp = json.loads(urllib2.urlopen(req).read())
+    
+    search_by = "key" if organization_key else "name"
+    search_key = organization_key if organization_key else organization_name
+    for org in resp:
+        if org[search_by] == search_key:
+            if ('private_repository' in org and org['private_repository'] != private) or ('private_repository' not in org and private):
+                print(
+                    "Organization privacy does not match provided privacy settings.")
+                privacy = "private" if 'private_repository' in org and org[
+                    'private_repository'] else "public"
+                privacy_provided = "private" if private else "public"
+                print("Organization " +
+                      org['name'] + " with key " + org['key'] + " is " + privacy + " while your import privacy settings state " + privacy_provided)
+                return None
+            organization_key = org['key']
+
+    return organization_key
 
 def get_project_key(project_name, project_key=None):
     '''

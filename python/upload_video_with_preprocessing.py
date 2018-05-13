@@ -29,11 +29,11 @@ def get_args():
     p.add_argument("--user", help="User name")
     p.add_argument("--email", help="User email")
     p.add_argument(
-        "--project", help="Specify project for the video", default=None)
-    p.add_argument('--project_key',
-                   help="add project to EXIF (project key)", default=None)
-    p.add_argument('--skip_validate_project',
-                   help="do not validate project key or project name", action='store_true')
+        "--organization_name", help="Specify organization name for the video", default=None)
+    p.add_argument('--organization_key',
+                   help="add organization to EXIF (organization key)", default=None)
+    p.add_argument('--skip_validate_organization',
+                   help="do not validate organization key or organization name", action='store_true')
 
     return p.parse_args()
 
@@ -79,11 +79,11 @@ if __name__ == "__main__":
         upload_cmd.append("--skip_upload")
     if args.email:
         upload_cmd.extend(["--email", args.email])
-    if args.project:
-        upload_cmd.extend(["--project", repr(args.project)])
-    if args.project_key:
-        upload_cmd.extend(["--project_key", repr(args.project_key)])
-    if args.project_key:
-        upload_cmd.append("--skip_validate_project")
+    if args.organization_name:
+        upload_cmd.extend(["--organization_name", repr(args.organization)])
+    if args.organization_key:
+        upload_cmd.extend(["--organization_key", repr(args.organization_key)])
+    if args.organization_key:
+        upload_cmd.append("--skip_validate_organization")
 
     run(upload_cmd)
