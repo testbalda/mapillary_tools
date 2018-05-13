@@ -278,8 +278,10 @@ if __name__ == '__main__':
 
                         # Add original file name to EXIF
                         if add_file_name:
-                            external_properties = {"file_name": abs_file_path + os.path.basename(filename)}
-                            
+                            if abs_file_path :
+                                external_properties = {"file_name": abs_file_path + os.path.basename(filename)}
+                            else:
+                                external_properties = {"file_name": os.path.abspath(filename)}
                         if verify_exif(filepath):
                             if not retry_upload:
                                 # skip creating new sequence id for failed images
